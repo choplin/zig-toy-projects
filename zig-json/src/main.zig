@@ -133,7 +133,7 @@ fn parseObjectKeyValue(allocator: Allocator, s: *PeekStream, m: *ValueMap) JsonE
     var key = try parseString(allocator, s);
     defer key.deinit();
     try skipWhitespace(s);
-    var byte = try r.readByte();
+    const byte = try r.readByte();
     if (byte != ':') return JsonError.SyntaxError;
     try skipWhitespace(s);
     const value = try parseImpl(allocator, s);
@@ -294,12 +294,14 @@ fn parseImpl(allocator: Allocator, s: *PeekStream) JsonError!Value {
 test "parse empty" {
     const json_str = "";
     var v = parseJsonString(std.testing.allocator, json_str);
+    defer v.deinit();
     try std.testing.expectError(JsonError.SyntaxError, v);
 }
 
 test "parse invalid json" {
     const json_str = "asdf";
     var v = parseJsonString(std.testing.allocator, json_str);
+    defer v.deinit();
     try std.testing.expectError(JsonError.SyntaxError, v);
 }
 
@@ -337,6 +339,7 @@ test "parse number" {
 test "parse invalid number" {
     const json_str = "123.456asdf";
     var v = parseJsonString(std.testing.allocator, json_str);
+    defer v.deinit();
     try std.testing.expectError(JsonError.SyntaxError, v);
 }
 
